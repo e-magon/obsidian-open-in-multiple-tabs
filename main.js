@@ -500,7 +500,7 @@ class OpenInMultipleTabsPlugin extends Plugin {
 		}
 
 		this.registerDomEvent(document, 'click', (event) => {
-			if ( event.target.closest('.continuous_mode_open_links_button') !== null ) {
+			if ( event.target.closest('.oimt-open-links-button') !== null ) {
 				showLinksMenu(event);
 			}
 		});
@@ -562,8 +562,8 @@ class OpenInMultipleTabsPlugin extends Plugin {
 
 			// The button opens the links of the hovered query or Dataview block
 			const buttonContainerEl = getButtonContainer(event.target);
-			if ( buttonContainerEl?.querySelector('.continuous_mode_open_links_button') === null ) {
-				const button = buttonContainerEl.createEl('div', { cls: 'continuous_mode_open_links_button clickable-icon' });
+			if ( buttonContainerEl?.querySelector('.oimt-open-links-button') === null ) {
+				const button = buttonContainerEl.createEl('div', { cls: 'oimt-open-links-button clickable-icon' });
 				button.setAttribute('aria-label', 'Open in multiple tabs');
 				button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>`;
 			}
@@ -872,7 +872,7 @@ class OpenInMultipleTabsPlugin extends Plugin {
 		for ( const tabGroupEl of this.app.workspace.containerEl.querySelectorAll('.workspace-tabs') ) {
 			delete tabGroupEl.dataset.sortOrder;
 		}
-		for ( const button of document.querySelectorAll('.continuous_mode_open_links_button') ) {
+		for ( const button of document.querySelectorAll('.oimt-open-links-button') ) {
 			button.remove();
 		}
 	}
@@ -987,13 +987,13 @@ class OpenInMultipleTabsSettings extends PluginSettingTab {
 			['pdf', 'Include pdfs', null]
 		];
 		for ( const [fileType, name, description] of fileTypeRows ) {
-			addToggleRow(name, description, ['omit-setting-indent'], settings.includedFileTypes.includes(fileType), (value) => setFileType(fileType, value));
+			addToggleRow(name, description, ['oimt-setting-indent'], settings.includedFileTypes.includes(fileType), (value) => setFileType(fileType, value));
 		}
 
 		new Setting(containerEl)
 			.setName('Include other file extensions')
 			.setDesc('If you have installed plugins that allow Obsidian to support file types not listed above, add their extensions here, comma-separated.')
-			.setClass('omit-setting-indent')
+			.setClass('oimt-setting-indent')
 			.addText((text) => text
 				.setPlaceholder('e.g. html, js, py, etc.')
 				.setValue(settings.extraFileTypes?.join(',') || '')
@@ -1003,28 +1003,28 @@ class OpenInMultipleTabsSettings extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Excluded files')
 			.setDesc('Exclude files by exact name and extension, for example index.md or draft.canvas. Comma-separated and case-sensitive.')
-			.setClass('omit-setting-indent')
+			.setClass('oimt-setting-indent')
 			.addText((text) => text
 				.setPlaceholder('e.g. index.md, draft.md')
 				.setValue(settings.excludedNames?.join(',') || '')
 				.onChange((value) => saveSetting('excludedNames', [...new Set(value.split(',').map((name) => name.trim()))].filter(Boolean)))
 			);
 
-		addToggleRow('Include embedded files', 'If true, include embedded files when opening all document links as tabs.', ['omit-setting-indent'], settings.includeEmbeddedFiles, (value) => saveSetting('includeEmbeddedFiles', value));
-		addToggleRow('Include all Dataview and query block links', 'If true, include links in Dataview and query blocks when opening all document links as tabs. Whether true or false, the links of an individual block can still be opened from its own menu.', ['omit-setting-indent'], settings.includeBlockLinks, (value) => saveSetting('includeBlockLinks', value));
+		addToggleRow('Include embedded files', 'If true, include embedded files when opening all document links as tabs.', ['oimt-setting-indent'], settings.includeEmbeddedFiles, (value) => saveSetting('includeEmbeddedFiles', value));
+		addToggleRow('Include all Dataview and query block links', 'If true, include links in Dataview and query blocks when opening all document links as tabs. Whether true or false, the links of an individual block can still be opened from its own menu.', ['oimt-setting-indent'], settings.includeBlockLinks, (value) => saveSetting('includeBlockLinks', value));
 
 		new Setting(containerEl)
 			.setName('2. Opening items')
 			.setHeading()
 			.setDesc('These settings control how items are opened as tabs.');
 
-		// The CSS shows the `hidden` and `next-hidden` rows only while this toggle is on, so the three rows must stay adjacent
-		addToggleRow('Allow single click to open File Explorer items', 'Enable this setting to open items from the File Explorer with a single click. Choose the action below.', ['omit-setting-indent'], settings.allowSingleClickOpenFolder, (value) => saveSetting('allowSingleClickOpenFolder', value));
+		// The CSS shows the `oimt-hidden` and `oimt-next-hidden` rows only while this toggle is on, so the three rows must stay adjacent
+		addToggleRow('Allow single click to open File Explorer items', 'Enable this setting to open items from the File Explorer with a single click. Choose the action below.', ['oimt-setting-indent'], settings.allowSingleClickOpenFolder, (value) => saveSetting('allowSingleClickOpenFolder', value));
 
 		new Setting(containerEl)
 			.setName('Set default single-click action:')
-			.setClass('omit-setting-indent-2')
-			.setClass('hidden')
+			.setClass('oimt-setting-indent-2')
+			.setClass('oimt-hidden')
 			.addDropdown((dropdown) => {
 				dropdown.addOption('disabled', '-');
 				for ( const { action, title } of OPEN_ACTIONS ) {
@@ -1040,13 +1040,13 @@ class OpenInMultipleTabsSettings extends PluginSettingTab {
 				});
 			});
 
-		addToggleRow('Warn on replace', 'Warn when replacing the items of the active tab group with new items.', ['next-hidden', 'omit-setting-indent-2'], settings.warnOnReplace, (value) => saveSetting('warnOnReplace', value));
-		addToggleRow('Open folders recursively', 'Recursively open all items in a folder, including those in subfolders. Sorting follows the default sort order setting below. With File Explorer order, items in collapsed folders are ignored, because only the visible files have an order.', ['omit-setting-indent'], settings.openFoldersRecursively, (value) => saveSetting('openFoldersRecursively', value));
+		addToggleRow('Warn on replace', 'Warn when replacing the items of the active tab group with new items.', ['oimt-next-hidden', 'oimt-setting-indent-2'], settings.warnOnReplace, (value) => saveSetting('warnOnReplace', value));
+		addToggleRow('Open folders recursively', 'Recursively open all items in a folder, including those in subfolders. Sorting follows the default sort order setting below. With File Explorer order, items in collapsed folders are ignored, because only the visible files have an order.', ['oimt-setting-indent'], settings.openFoldersRecursively, (value) => saveSetting('openFoldersRecursively', value));
 
 		new Setting(containerEl)
 			.setName('Maximum number of items to open at one time')
 			.setDesc('Leave empty (or set to 0) to open all items at once. A low value lets you append the items of a folder incrementally by clicking it repeatedly with the single-click action set to Append, which is useful for folders with a large number of items.')
-			.setClass('omit-setting-indent')
+			.setClass('oimt-setting-indent')
 			.addText((text) => text
 				.setPlaceholder('10')
 				.setValue(settings.maximumItemsToOpen?.toString() || '0')
@@ -1063,7 +1063,7 @@ class OpenInMultipleTabsSettings extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Default sort order:')
 			.setDesc('If no value is set, items are sorted according to the current sort order of their source, such as the File Explorer or the search results. File Explorer order honors any custom sorting handled by other plugins and only works with expanded folders.')
-			.setClass('omit-setting-indent')
+			.setClass('oimt-setting-indent')
 			.addDropdown((dropdown) => {
 				dropdown.addOption('disabled', '-');
 				for ( const entry of SORT_ORDERS ) {
@@ -1073,7 +1073,7 @@ class OpenInMultipleTabsSettings extends PluginSettingTab {
 				dropdown.onChange((value) => saveSetting('defaultSortOrder', value));
 			});
 
-		addToggleRow('Index files at top', 'If a directory contains an index.md file, or a file named after the directory itself, move it to the top of the opened tabs regardless of the sort order.', ['omit-setting-indent'], settings.indexFilesAtTop, (value) => saveSetting('indexFilesAtTop', value));
+		addToggleRow('Index files at top', 'If a directory contains an index.md file, or a file named after the directory itself, move it to the top of the opened tabs regardless of the sort order.', ['oimt-setting-indent'], settings.indexFilesAtTop, (value) => saveSetting('indexFilesAtTop', value));
 	}
 }
 
